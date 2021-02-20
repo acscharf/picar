@@ -1,4 +1,12 @@
-import picar_4wd as fc
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from threading import Thread
+
+from picamera import PiCamera
+from picamera.array import PiRGBArray
+
+#import picar_4wd as fc
 import time
 import numpy as np
 import sys
@@ -6,14 +14,59 @@ import math
 from PIL import Image
 import heapq
 
+import argparse
+import io
+import re
+import time
+import cv2
+
+
+from annotation import Annotator
+
+import numpy as np
+import picamera
+
+from PIL import Image
+from tflite_runtime.interpreter import Interpreter
+
+
 speed = 10
 safe_distance = 15
 
 
 def main():
+    print("yolo2")
 
+    labels = load_labels('coco_labels.txt')
+    interpreter = Interpreter('detect.tflite')
+
+    interpreter.allocate_tensors()
+    _, input_height, input_width, _ = interpreter.get_input_details()[0]['shape']
+
+
+    results = False
+
+    vs = PiVideoStream().start()
+    time.sleep(2)
+        
 
     while True:
+
+        frame = vs.read()
+        image = Image.fromarray(frame).convert('RGB').resize(
+            (input_width, input_height), Image.ANTIALIAS)
+        results = detect_objects(interpreter, image, 0.4)
+
+        while results is True:
+            frame = vs.read()
+            image = Image.fromarray(frame).convert('RGB').resize(
+            (input_width, input_height), Image.ANTIALIAS)
+            results = detect_objects(interpreter, image, 0.4)
+            print("stopped")
+            fc.stop()
+
+        print("moving on")
+
         scan_list = fc.scan_step(35)
         if not scan_list:
             continue
@@ -57,12 +110,12 @@ def turn_left_s(speed):
 
 def turn_right_s(speed):
     fc.turn_right(speed)
-    time.sleep(.35)
+    time.sleep(.3)
     fc.stop()
 
 def forward_s(speed):
     fc.forward(speed)
-    time.sleep(1.5)
+    time.sleep(1)
     fc.stop()
 
 def get_direction(lefts, rights):
@@ -261,8 +314,129 @@ def get_line(x1, y1, x2, y2, array):
 
     return array
 
+
+def load_labels(path):
+  """Loads the labels file. Supports files with or without index numbers."""
+  with open(path, 'r', encoding='utf-8') as f:
+    lines = f.readlines()
+    labels = {}
+    for row_number, content in enumerate(lines):
+      pair = re.split(r'[:\s]+', content.strip(), maxsplit=1)
+      if len(pair) == 2 and pair[0].strip().isdigit():
+        labels[int(pair[0])] = pair[1].strip()
+      else:
+        labels[row_number] = pair[0].strip()
+  return labels
+
+
+def set_input_tensor(interpreter, image):
+  """Sets the input tensor."""
+  tensor_index = interpreter.get_input_details()[0]['index']
+  input_tensor = interpreter.tensor(tensor_index)()[0]
+  input_tensor[:, :] = image
+
+
+def get_output_tensor(interpreter, index):
+  """Returns the output tensor at the given index."""
+  output_details = interpreter.get_output_details()[index]
+  tensor = np.squeeze(interpreter.get_tensor(output_details['index']))
+  return tensor
+
+
+def detect_objects(interpreter, image, threshold):
+  """Returns a list of detection results, each a dictionary of object info."""
+  set_input_tensor(interpreter, image)
+  interpreter.invoke()
+
+  # Get all output details
+  classes = get_output_tensor(interpreter, 1)
+  scores = get_output_tensor(interpreter, 2)
+  count = int(get_output_tensor(interpreter, 3))
+
+  results = False
+  for i in range(count):
+    if scores[i] >= threshold:
+        if classes[i] == 12:
+            results = True
+            print("saw a stop sign!!")
+  return results
+
+
+def annotate_objects(annotator, results, labels):
+  """Draws the bounding box and label for each object in the results."""
+  for obj in results:
+    # Convert the bounding box figures from relative coordinates
+    # to absolute coordinates based on the original resolution
+    ymin, xmin, ymax, xmax = obj['bounding_box']
+    xmin = int(xmin * CAMERA_WIDTH)
+    xmax = int(xmax * CAMERA_WIDTH)
+    ymin = int(ymin * CAMERA_HEIGHT)
+    ymax = int(ymax * CAMERA_HEIGHT)
+
+    # Overlay the box, label, and score on the camera preview
+    annotator.bounding_box([xmin, ymin, xmax, ymax])
+    annotator.text([xmin, ymin],
+                   '%s\n%.2f' % (labels[obj['class_id']], obj['score']))
+
+class PiVideoStream:
+    def __init__(self, resolution=(320, 240), framerate=32, **kwargs):
+        # initialize the camera
+        self.camera = PiCamera()
+
+        # set camera parameters
+        self.camera.resolution = resolution
+        self.camera.framerate = framerate
+
+        # set optional camera parameters (refer to PiCamera docs)
+        for (arg, value) in kwargs.items():
+            setattr(self.camera, arg, value)
+
+        # initialize the stream
+        self.rawCapture = PiRGBArray(self.camera, size=resolution)
+        self.stream = self.camera.capture_continuous(self.rawCapture,
+            format="bgr", use_video_port=True)
+
+        # initialize the frame and the variable used to indicate
+        # if the thread should be stopped
+        self.frame = None
+        self.stopped = False
+
+    def start(self):
+        # start the thread to read frames from the video stream
+        t = Thread(target=self.update, args=())
+        t.daemon = True
+        t.start()
+        return self
+
+    def update(self):
+        # keep looping infinitely until the thread is stopped
+        for f in self.stream:
+        # grab the frame from the stream and clear the stream in
+        # preparation for the next frame
+            self.frame = f.array
+
+            self.rawCapture.truncate(0)
+
+            # if the thread indicator variable is set, stop the thread
+            # and resource camera resources
+            if self.stopped:
+                self.stream.close()
+                self.rawCapture.close()
+                self.camera.close()
+                return
+
+    def read(self):
+    # return the frame most recently read
+        return self.frame
+
+    def stop(self):
+    # indicate that the thread should be stopped
+        self.stopped = True
+
+
 if __name__ == "__main__":
     try: 
         main()
     finally: 
-        fc.stop()
+        print("yolo")
+        # fc.stop()
