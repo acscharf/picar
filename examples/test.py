@@ -6,7 +6,7 @@ from threading import Thread
 from picamera import PiCamera
 from picamera.array import PiRGBArray
 
-#import picar_4wd as fc
+import picar_4wd as fc
 import time
 import numpy as np
 import sys
@@ -30,42 +30,23 @@ from PIL import Image
 from tflite_runtime.interpreter import Interpreter
 
 
-speed = 10
+speed = 5
 safe_distance = 15
 
 
 def main():
-    print("yolo2")
-
-    labels = load_labels('coco_labels.txt')
-    interpreter = Interpreter('detect.tflite')
-
-    interpreter.allocate_tensors()
-    _, input_height, input_width, _ = interpreter.get_input_details()[0]['shape']
-
-
-    results = False
-
-    vs = PiVideoStream().start()
-    time.sleep(2)
-        
 
     while True:
+        move = read_angles()
+        print(move)
 
-        frame = vs.read()
-        image = Image.fromarray(frame).convert('RGB').resize(
-            (input_width, input_height), Image.ANTIALIAS)
-        results = detect_objects(interpreter, image, 0.4)
 
-        while results is True:
-            frame = vs.read()
-            image = Image.fromarray(frame).convert('RGB').resize(
-            (input_width, input_height), Image.ANTIALIAS)
-            results = detect_objects(interpreter, image, 0.4)
-            print("stopped")
-            fc.stop()
+    print("yolo2")
 
-        print("moving on")
+    vs = PiVideoStream().start()
+    time.sleep(2)     
+
+    while True:
 
         scan_list = fc.scan_step(35)
         if not scan_list:
@@ -75,11 +56,21 @@ def main():
 
         if tmp != [2,2,2,2]:
             print("Saw something!!")
+
             fc.stop()
+
             move = read_angles()
-            print(tmp)
+
+            result = vs.see_sign()
+            print(result)
+            if result is True:
+                fc.stop()
+                time.sleep(5)
+                print("Stopped for a stop sign after detecting object")
+                vs.reset_stop()
+
             # should go left
-            if move == 0:
+            if move == 0 and result is False:
                 print("Moving left")
                 turn_left_s(speed)
                 forward_s(speed)
@@ -90,7 +81,7 @@ def main():
 
                 
             #go right
-            if move == 1:
+            if move == 1 and result is False:
                 print("Moving right")
                 turn_right_s(speed)
                 forward_s(speed)
@@ -101,7 +92,14 @@ def main():
 
         else:
             fc.forward(speed)
-
+            print("moving forward")
+            result = vs.see_sign()
+            print(result)
+            if result is True:
+                fc.stop()
+                time.sleep(5)
+                print("Stopped for a stop sign while moving")
+                vs.reset_stop()
 
 def turn_left_s(speed):
     fc.turn_left(speed)
@@ -110,14 +108,16 @@ def turn_left_s(speed):
 
 def turn_right_s(speed):
     fc.turn_right(speed)
-    time.sleep(.3)
+    time.sleep(.35)
     fc.stop()
 
 def forward_s(speed):
+
     fc.forward(speed)
-    time.sleep(1)
+    time.sleep(1.5)
     fc.stop()
 
+'''
 def get_direction(lefts, rights):
     choice1 = fc.get_status_at(30, 35, 10)
     choice2 = fc.get_status_at(-30, 35, 10)
@@ -144,6 +144,8 @@ def get_direction(lefts, rights):
         return True, lefts, rights
     else:
         return False, lefts, rights
+
+'''
 
 def read_angles():
     angle_range = 180
@@ -191,6 +193,8 @@ def read_angles():
             #print(x)
             #print("Y is")
             #print(y)
+            #make it bigger
+            x = x
             y = y + 40
             array[x,y] = 1
 
@@ -226,6 +230,7 @@ def read_angles():
     np.savetxt("test.out", array, fmt='%i')
 
     if ytotal == 39:
+        ## object is off to one side
         print("Straight")
         return 2
     if ytotal > 39:
@@ -358,7 +363,6 @@ def detect_objects(interpreter, image, threshold):
     if scores[i] >= threshold:
         if classes[i] == 12:
             results = True
-            print("saw a stop sign!!")
   return results
 
 
@@ -379,13 +383,20 @@ def annotate_objects(annotator, results, labels):
                    '%s\n%.2f' % (labels[obj['class_id']], obj['score']))
 
 class PiVideoStream:
-    def __init__(self, resolution=(320, 240), framerate=32, **kwargs):
+    def __init__(self, resolution=(640, 480), framerate=30, **kwargs):
         # initialize the camera
         self.camera = PiCamera()
 
         # set camera parameters
         self.camera.resolution = resolution
         self.camera.framerate = framerate
+        self.saw_sign = False
+
+        self.labels = load_labels('coco_labels.txt')
+        self.interpreter = Interpreter('detect.tflite')
+
+        self.interpreter.allocate_tensors()
+        _, self.input_height, self.input_width, _ = self.interpreter.get_input_details()[0]['shape']
 
         # set optional camera parameters (refer to PiCamera docs)
         for (arg, value) in kwargs.items():
@@ -410,10 +421,20 @@ class PiVideoStream:
 
     def update(self):
         # keep looping infinitely until the thread is stopped
+    
         for f in self.stream:
         # grab the frame from the stream and clear the stream in
         # preparation for the next frame
             self.frame = f.array
+
+            image = Image.fromarray(self.frame).convert('RGB').resize(
+                (self.input_width, self.input_height), Image.ANTIALIAS)
+
+            self.results = detect_objects(self.interpreter, image, 0.4)
+            if self.results is True:
+                self.saw_sign = True
+                print("saw a stop sign and updated to true!!")
+            #stop sign
 
             self.rawCapture.truncate(0)
 
@@ -429,6 +450,13 @@ class PiVideoStream:
     # return the frame most recently read
         return self.frame
 
+    def see_sign(self):
+        return self.saw_sign
+
+    def reset_stop(self):
+    # return the frame most recently read
+        self.saw_sign = False
+
     def stop(self):
     # indicate that the thread should be stopped
         self.stopped = True
@@ -439,4 +467,4 @@ if __name__ == "__main__":
         main()
     finally: 
         print("yolo")
-        # fc.stop()
+        fc.stop()
