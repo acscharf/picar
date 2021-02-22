@@ -15,6 +15,7 @@ def start_server():
     print("listening on port ", port)
     try:
         client, clientInfo = s.accept()
+        print("Accepted connection from", clientInfo)
         while 1:   
             print("server recv from: ", clientInfo)
             data = client.recv(size)
