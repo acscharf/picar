@@ -35,6 +35,7 @@ def start_client():
     sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
     sock.connect((ubuntuMACAddress, port))
     while 1:
+        print("sending yolo")
         text = "yolo"
         sock.send(text)
         time.sleep(1.5)

@@ -32,6 +32,7 @@ def start_client():
     sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
     sock.connect((carMACAddress, port))
     while 1:
+        time.sleep(30)
         text = input("Enter your message: ") # Note change to the old (Python 2) raw_input
         if text == "quit":
             break
