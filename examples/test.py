@@ -30,21 +30,40 @@ from PIL import Image
 from tflite_runtime.interpreter import Interpreter
 
 
+
 speed = 5
 safe_distance = 15
 
 
 def main():
 
-    while True:
-        move = read_angles()
-        print(move)
+    forward_cnt = 0
 
+    distance1 = 15
+    direction1 = 'turnaround'
+    distance2 = 15
+    direction2 = 'turnaround'
+    distance3 = 15
+    direction3 = 'turnaround'
+    distance4 = 15
+    direction4 = 'turnaround'
+
+    current_distance = distance1
+    current_direction = direction1
+    step = 1
 
     print("yolo2")
 
     vs = PiVideoStream().start()
     time.sleep(2)     
+
+    while True:
+        result = vs.see_sign()
+        if result is True:
+            fc.stop()
+            time.sleep(5)
+            print("Stopped for a stop sign after detecting object")
+            vs.reset_stop()
 
     while True:
 
@@ -72,6 +91,7 @@ def main():
             # should go left
             if move == 0 and result is False:
                 print("Moving left")
+                forward_cnt = forward_cnt + 3
                 turn_left_s(speed)
                 forward_s(speed)
                 turn_right_s(speed)
@@ -83,6 +103,7 @@ def main():
             #go right
             if move == 1 and result is False:
                 print("Moving right")
+                forward_cnt = forward_cnt + 3
                 turn_right_s(speed)
                 forward_s(speed)
                 turn_left_s(speed)
@@ -92,7 +113,7 @@ def main():
 
         else:
             fc.forward(speed)
-            print("moving forward")
+            forward_cnt = forward_cnt + 1
             result = vs.see_sign()
             print(result)
             if result is True:
@@ -100,13 +121,53 @@ def main():
                 time.sleep(5)
                 print("Stopped for a stop sign while moving")
                 vs.reset_stop()
+            print("total forward: ")
+
+            print(forward_cnt)
+            if forward_cnt > current_distance:
+                if step == 2:
+                    print("moving to step 2")
+                    current_distance = distance2
+                    current_direction = direction2
+                if step == 3:
+                    print("moving to step 3")
+                    current_distance = distance3
+                    current_direction = direction3
+                if step == 4:
+                    print("moving to step 4")
+                    current_distance = distance4
+                    current_direction = direction4
+
+                step = step + 1
+                
+                if current_direction == 'left':
+                    print("making a left turn")
+                    fc.turn_left(speed)
+                    time.sleep(1)
+                    fc.stop()
+          
+                if current_direction == 'right':
+                    print("making a right turn")
+                    fc.turn_right(speed)
+                    time.sleep(1)
+                    fc.stop()
+
+                if current_direction == 'turnaround':
+                    print("turning around")
+                    fc.turn_right(speed)
+                    time.sleep(1.75)
+                    fc.stop()
+                
+                forward_cnt = 0
 
 def turn_left_s(speed):
+
     fc.turn_left(speed)
     time.sleep(.3)
     fc.stop()
 
 def turn_right_s(speed):
+
     fc.turn_right(speed)
     time.sleep(.35)
     fc.stop()
@@ -161,7 +222,7 @@ def read_angles():
     x = 0
     y = 0
 
-    array = np.zeros((40,80))
+    array = np.zeros((40,81))
 
     while angle >= -90:
         #print("Angle is")
@@ -426,6 +487,8 @@ class PiVideoStream:
         # grab the frame from the stream and clear the stream in
         # preparation for the next frame
             self.frame = f.array
+
+            cv2.imwrite('color_img.jpg', self.frame)
 
             image = Image.fromarray(self.frame).convert('RGB').resize(
                 (self.input_width, self.input_height), Image.ANTIALIAS)
