@@ -4,6 +4,7 @@ import picar_4wd as fc
 import time
 
 def start_server():
+    print("car server starting")
     myMACAddress = "DC:A6:32:8C:F7:C9" #This bluetooth adapter
     port = 0
     backlog = 1
@@ -27,6 +28,7 @@ def start_server():
         s.close()
 
 def start_client():
+    print("car client starting")
     ubuntuMACAddress = "00:1A:7D:DA:71:15" #
     port = 1
     sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
@@ -34,7 +36,6 @@ def start_client():
     while 1:
         text = "yolo"
         sock.send(text)
-        data = sock.recv(1024)
         time.sleep(1.5)
 
     sock.close()

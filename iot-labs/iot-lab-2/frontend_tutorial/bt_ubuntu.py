@@ -2,6 +2,7 @@ import bluetooth
 import threading
 
 def start_server():
+    print("ubuntu server starting")
     myMACAddress = "00:1A:7D:DA:71:15" #This bluetooth adapter
     port = 0
     backlog = 1
@@ -23,6 +24,7 @@ def start_server():
         s.close()
 
 def start_client():
+    print("ubuntu client starting")
     carMACAddress = "DC:A6:32:8C:F7:C9" # The address of Raspberry PI Bluetooth adapter on the server.
     port = 1
     sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
