@@ -1,4 +1,5 @@
 import bluetooth
+import picar_4wd as fc
 
 hostMACAddress = "DC:A6:32:8C:F7:C9" # The address of Raspberry PI Bluetooth adapter on the server. The server might have multiple Bluetooth adapters.
 port = 0
@@ -15,7 +16,8 @@ try:
         data = client.recv(size)
         if data:
             print(data)
-            client.send(data) # Echo back to client
+            distance = fc.get_distance_at(int(data))
+            client.send(distance) # Echo back to client
 except: 
     print("Closing socket")
     client.close()
