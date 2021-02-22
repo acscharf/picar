@@ -44,10 +44,12 @@ def start_client():
 
     sock.close()
 
-sth = threading.Thread(target=start_server)
-cth = threading.Thread(target=start_client)
+start_server()
 
-sth.start()
+#sth = threading.Thread(target=start_server)
+#cth = threading.Thread(target=start_client)
+
+#sth.start()
 #cth.start()
 
 #cth.join()
