@@ -28,6 +28,7 @@ def start_server():
         s.close()
 
 def start_client():
+    time.sleep(10)
     print("car client starting")
     ubuntuMACAddress = "00:1A:7D:DA:71:15" #
     port = 1
