@@ -44,6 +44,7 @@ def start_server():
         client, clientInfo = s.accept()
         print("Pi server received connection")
         while 1:   
+            print("Going here")
             global diagnostic 
             data = client.recv(size)
             print("Printing data")
