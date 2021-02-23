@@ -14,9 +14,9 @@ def start_server():
     print("listening on port ", port)
     try:
         client, clientInfo = s.accept()
-        print("Accepted connection from", clientInfo)
+        print("Pi server received connection")
         while 1:   
-            print("server recv from: ", clientInfo)
+            print("Pi server received data")
             data = client.recv(size)
             if data:
                 print(data)
@@ -27,13 +27,12 @@ def start_server():
 
 def start_client():
     time.sleep(10)
-    print("ubuntu client starting")
+    print("Pi client starting")
     carMACAddress = "DC:A6:32:8C:F7:C9" # The address of Raspberry PI Bluetooth adapter on the server.
     port = 1
     sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
     sock.connect((carMACAddress, port))
     while 1:
-        time.sleep(30)
         text = input("Enter your message: ") # Note change to the old (Python 2) raw_input
         if text == "quit":
             break

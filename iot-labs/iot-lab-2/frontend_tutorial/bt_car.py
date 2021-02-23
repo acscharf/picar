@@ -15,9 +15,9 @@ def start_server():
     print("listening on port ", port)
     try:
         client, clientInfo = s.accept()
-        print("Accepted connection from", clientInfo)
+        print("Car server was connected")
         while 1:   
-            print("server recv from: ", clientInfo)
+            print("Car server received data")
             data = client.recv(size)
             if data:
                 print(data)
