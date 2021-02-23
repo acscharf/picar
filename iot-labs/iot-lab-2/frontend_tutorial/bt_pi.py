@@ -5,6 +5,7 @@ import sys
 import tty
 import termios
 import asyncio
+import json
 
 diagnostic = {}
 
