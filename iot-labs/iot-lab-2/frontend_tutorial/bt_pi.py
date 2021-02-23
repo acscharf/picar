@@ -6,6 +6,8 @@ import tty
 import termios
 import asyncio
 
+data = ""
+
 ## from sunfounder library
 def readchar():
     fd = sys.stdin.fileno()
@@ -43,9 +45,8 @@ def start_server():
         print("Pi server received connection")
         while 1:   
             print("Pi server received data")
-            data = client.recv(size)
-            if data:
-                print(data)
+            global data = client.recv(size)
+            
     except: 
         print("Closing socket")
         client.close()
@@ -61,19 +62,22 @@ def start_client():
     print("Pi client started. Press keys to move:")
     while 1:
         key=readkey()
-        if key=='w':
-            sock.send(key)
-        elif key=='a':
-            sock.send(key)
-        elif key=='s':
-            sock.send(key)
-        elif key=='d':
-            sock.send(key)
+        if key == 'p':
+            print(data)
         else:
-            sock.send('stop')
+            if key=='w':
+                sock.send(key)
+            elif key=='a':
+                sock.send(key)
+            elif key=='s':
+                sock.send(key)
+            elif key=='d':
+                sock.send(key)
+            else:
+                sock.send('stop')
 
-        data = sock.recv(1024)
-        print("from server: ", data)
+            data = sock.recv(1024)
+            print("from server: ", data)
 
     sock.close()
 
