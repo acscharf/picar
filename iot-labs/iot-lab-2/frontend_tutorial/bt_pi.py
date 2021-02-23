@@ -6,7 +6,7 @@ import tty
 import termios
 import asyncio
 
-diagnostic = ""
+diagnostic = {}
 
 ## from sunfounder library
 def readchar():
@@ -45,7 +45,9 @@ def start_server():
         print("Pi server received connection")
         while 1:   
             global diagnostic 
-            diagnostic = client.recv(size)
+            data = client.recv(size)
+            text = data.decode(encoding='UTF-8')
+            diagnostic = json.loads(text)
             
     except: 
         print("Closing socket")
@@ -64,6 +66,9 @@ def start_client():
         key=readkey()
         if key == 'p':
             print(diagnostic)
+        elif key == 'q':
+            print("quitting")
+            break
         else:
             if key=='w':
                 sock.send(key)

@@ -39,7 +39,7 @@ def start_server():
                     client.send("Turning right")
                 elif command == 'stop':
                     fc.stop()
-                    client.send("Turning right")
+                    client.send("Stopping")
                 else:
                     print("Unrecognized command")
                     print(data)
