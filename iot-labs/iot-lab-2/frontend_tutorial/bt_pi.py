@@ -66,8 +66,8 @@ def start_client():
     while 1:
         key=readkey()
         if key == 'p':
-            print("CPU usage: {}℃".format(diagnostic['cpu_temperature']))
-            print(diagnostic)
+            print("CPU temp: {}°C".format(diagnostic['cpu_temperature']))
+            print("Battery level: {}v/8.4v".format(diagnostic['battery']))
         elif key == 'q':
             print("quitting")
             break
