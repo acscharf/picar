@@ -63,7 +63,7 @@ def start_client():
     while 1:
         key=readkey()
         if key == 'p':
-            print(data)
+            print(diagnostic)
         else:
             if key=='w':
                 sock.send(key)
