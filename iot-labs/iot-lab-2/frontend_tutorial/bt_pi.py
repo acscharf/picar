@@ -1,6 +1,32 @@
 import bluetooth
 import threading
 import time
+import sys
+import tty
+import termios
+import asyncio
+
+## from sunfounder library
+def readchar():
+    fd = sys.stdin.fileno()
+    old_settings = termios.tcgetattr(fd)
+    try:
+        tty.setraw(sys.stdin.fileno())
+        ch = sys.stdin.read(1)
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+    return ch
+
+def readkey(getchar_fn=None):
+    getchar = getchar_fn or readchar
+    c1 = getchar()
+    if ord(c1) != 0x1b:
+        return c1
+    c2 = getchar()
+    if ord(c2) != 0x5b:
+        return c1
+    c3 = getchar()
+    return chr(0x10 + ord(c3) - 65)
 
 def start_server():
     print("ubuntu server starting")
@@ -32,11 +58,19 @@ def start_client():
     port = 1
     sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
     sock.connect((carMACAddress, port))
+    print("Pi client started. Press keys to move:")
     while 1:
-        text = input("Enter your message: ") # Note change to the old (Python 2) raw_input
-        if text == "quit":
-            break
-        sock.send(text)
+        key=readkey()
+        if key=='w':
+            sock.send(key)
+        elif key=='a':
+            sock.send(key)
+        elif key=='s':
+            sock.send(key)
+        elif key=='d':
+            sock.send(key)
+        else:
+            sock.send('stop')
 
         data = sock.recv(1024)
         print("from server: ", data)
