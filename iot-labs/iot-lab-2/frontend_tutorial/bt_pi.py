@@ -45,7 +45,8 @@ def start_server():
         print("Pi server received connection")
         while 1:   
             print("Pi server received data")
-            global data = client.recv(size)
+            global data 
+            data = client.recv(size)
             
     except: 
         print("Closing socket")
