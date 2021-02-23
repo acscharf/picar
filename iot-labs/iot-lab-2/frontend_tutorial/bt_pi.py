@@ -44,8 +44,6 @@ def start_client():
 
     sock.close()
 
-start_server()
-
 sth = threading.Thread(target=start_server)
 cth = threading.Thread(target=start_client)
 
