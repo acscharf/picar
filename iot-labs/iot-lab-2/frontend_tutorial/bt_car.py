@@ -44,13 +44,13 @@ def start_client():
 
 start_client()
 
-#sth = threading.Thread(target=start_server)
-#cth = threading.Thread(target=start_client)
+sth = threading.Thread(target=start_server)
+cth = threading.Thread(target=start_client)
 
-#sth.start()
-#cth.start()
+sth.start()
+cth.start()
 
-#cth.join()
-#sth.join()
+cth.join()
+sth.join()
 
 print("Success, terminating")
