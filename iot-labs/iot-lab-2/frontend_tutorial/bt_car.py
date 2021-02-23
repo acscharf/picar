@@ -29,6 +29,7 @@ def start_server():
         s.close()
 
 def start_client():
+    time.sleep(10)
     print("car client starting")
     ubuntuMACAddress = "DC:A6:32:93:2D:CC" #
     port = 1
@@ -38,7 +39,7 @@ def start_client():
         print("sending yolo")
         text = "yolo"
         sock.send(text)
-        time.sleep(1.5)
+        time.sleep(10)
 
     sock.close()
 
