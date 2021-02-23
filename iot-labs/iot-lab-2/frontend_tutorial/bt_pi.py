@@ -45,16 +45,15 @@ def start_server():
         print("Pi server received connection")
         while 1:   
             print("Going here")
-            global diagnostic 
             data = client.recv(size)
             print("Printing data")
             print(data)
             text = data.decode(encoding='UTF-8')
             print("Printing text")
             print(text)
-            diagnostic = json.loads(text)
+            diagnostic_test = json.loads(text)
             print("Printing diagnostic")
-            print(diagnostic)
+            print(diagnostic_test)
             
     except: 
         print("Closing socket")
