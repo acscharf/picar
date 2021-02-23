@@ -46,8 +46,14 @@ def start_server():
         while 1:   
             global diagnostic 
             data = client.recv(size)
+            print("Printing data")
+            print(data)
             text = data.decode(encoding='UTF-8')
+            print("Printing text")
+            print(text)
             diagnostic = json.loads(text)
+            print("Printing diagnostic")
+            print(diagnostic)
             
     except: 
         print("Closing socket")
