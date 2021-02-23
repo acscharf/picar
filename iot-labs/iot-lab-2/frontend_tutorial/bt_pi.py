@@ -41,27 +41,19 @@ def start_server():
     s.bind((myMACAddress, port))
     s.listen(backlog)
     print("listening on port ", port)
-    #try:
-    client, clientInfo = s.accept()
-    print("Pi server received connection")
-    while 1:   
-        print("Going here")
-        data = client.recv(size)
-        print("Printing data")
-        print(data)
-        text = data.decode(encoding='UTF-8')
-        print("Printing text")
-        print(text)
-        diagnostic_test = json.loads(text)
-        print("Printing diagnostic")
-        print(diagnostic_test)
+    try:
+        client, clientInfo = s.accept()
+        print("Pi server received connection")
+        while 1:   
+            global diagnostic
+            data = client.recv(size)
+            text = data.decode(encoding='UTF-8')
+            diagnostic = json.loads(text)
 
-    '''       
     except: 
         print("Closing socket")
         client.close()
         s.close()
-    '''
 
 def start_client():
     time.sleep(10)
