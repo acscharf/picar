@@ -29,9 +29,8 @@ def start_server():
         s.close()
 
 def start_client():
-    time.sleep(10)
     print("car client starting")
-    ubuntuMACAddress = "00:1A:7D:DA:71:15" #
+    ubuntuMACAddress = "DC:A6:32:93:2D:CC" #
     port = 1
     sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
     sock.connect((ubuntuMACAddress, port))

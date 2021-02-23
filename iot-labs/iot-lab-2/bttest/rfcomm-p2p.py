@@ -6,7 +6,7 @@ uuid = "94f39d29-7d6d-437d-973b-fba39e49d4ee"
 
 def start_server():
     server_sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
-    server_sock.bind(("", bluetooth.PORT_ANY))
+    server_sock.bind(("DC:A6:32:8C:F7:C9", bluetooth.PORT_ANY))
     server_sock.listen(1)
 
     port = server_sock.getsockname()[1]

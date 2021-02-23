@@ -4,7 +4,7 @@ import time
 
 def start_server():
     print("ubuntu server starting")
-    myMACAddress = "00:1A:7D:DA:71:15" #This bluetooth adapter
+    myMACAddress = "DC:A6:32:93:2D:CC" #This bluetooth adapter
     port = 0
     backlog = 1
     size = 1024
@@ -26,7 +26,6 @@ def start_server():
         s.close()
 
 def start_client():
-    time.sleep(10)
     print("ubuntu client starting")
     carMACAddress = "DC:A6:32:8C:F7:C9" # The address of Raspberry PI Bluetooth adapter on the server.
     port = 1
