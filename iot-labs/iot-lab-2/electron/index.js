@@ -2,16 +2,18 @@ document.onkeydown = updateKey;
 document.onkeyup = resetKey;
 
 var server_port = 65432;
-var server_addr = "192.168.3.49";   // the IP address of your Raspberry PI
+var server_addr = "192.168.0.156";   // the IP address of your Raspberry PI
 
 function client(){
     
     const net = require('net');
     var input = document.getElementById("message").value;
 
+    console.log('yolo!');
+
     const client = net.createConnection({ port: server_port, host: server_addr }, () => {
         // 'connect' listener.
-        console.log('connected to server!');
+        console.log('connected to server!!!!');
         // send the message
         client.write(`${input}\r\n`);
     });
@@ -27,8 +29,17 @@ function client(){
     client.on('end', () => {
         console.log('disconnected from server');
     });
+}
 
-
+function send_data(message){
+    const net = require('net');
+    
+    const client = net.createConnection({ port: server_port, host: server_addr }, () => {
+        // 'connect' listener.
+        console.log('connected to server!!!!');
+        // send the message
+        client.write(message);
+    });
 }
 
 // for detecting which key is been pressed w,a,s,d
