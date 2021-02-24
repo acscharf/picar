@@ -67,6 +67,10 @@ function updateKey(e) {
         document.getElementById("rightArrow").style.color = "green";
         send_data("d");
     }
+    else if (e.keyCode == '32') {
+        // right (d)
+        send_data("stop");
+    }
 }
 
 // reset the key to the start state 

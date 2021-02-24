@@ -6,6 +6,7 @@ import json
 
 HOST = "192.168.0.156" # IP address of your Raspberry PI
 PORT = 65432          # Port to listen on (non-privileged ports are > 1023)
+power_val = 10
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     s.bind((HOST, PORT))
@@ -21,19 +22,18 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             if command:
                 if command == 'w':
                     fc.forward(power_val)
-                    client.send("Moving forward")
                 elif command == 'a':
                     fc.turn_left(power_val)
-                    client.send("Turning left")
+                    print("Turning left")
                 elif command == 's':
                     fc.backward(power_val)
-                    client.send("Moving back")
+                    print("Moving back")
                 elif command == 'd':
                     fc.turn_right(power_val)
-                    client.send("Turning right")
+                    print("Turning right")
                 elif command == 'stop':
                     fc.stop()
-                    client.send("Stopping")
+                    print("Stopping")
                 else:
                     print("Unrecognized command")
                     print(data)
