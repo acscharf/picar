@@ -137,8 +137,8 @@ def start_car_server():
             s.close()
             '''    
 
-sth = threading.Thread(target=start_server)
-cth = threading.Thread(target=start_client)
+sth = threading.Thread(target=start_video_server)
+cth = threading.Thread(target=start_car_server)
 
 sth.start()
 cth.start()
