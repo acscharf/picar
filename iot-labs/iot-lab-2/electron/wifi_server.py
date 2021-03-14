@@ -90,7 +90,8 @@ class StreamingServer(socketserver.ThreadingMixIn, server.HTTPServer):
 
 def start_video_server():
     with picamera.PiCamera(resolution='640x480', framerate=24) as camera:
-        global output = StreamingOutput()
+        global output
+        output = StreamingOutput()
         camera.start_recording(output, format='mjpeg')
         try:
             address = ('', 8000)
