@@ -91,6 +91,7 @@ class StreamingServer(socketserver.ThreadingMixIn, server.HTTPServer):
 def start_video_server():
     with picamera.PiCamera(resolution='640x480', framerate=24) as camera:
         global output
+        camera.rotation = 270
         output = StreamingOutput()
         camera.start_recording(output, format='mjpeg')
         try:
