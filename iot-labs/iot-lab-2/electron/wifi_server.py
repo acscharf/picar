@@ -132,7 +132,7 @@ def start_car_server():
                         print("sending piread")
                         text = pi_read()
                         json_msg = json.dumps(text)
-                        client.send(json_msg)
+                        client.send(json_msg.encode('utf-8'))
                     else:
                         print("Unrecognized command")
                         print(data)

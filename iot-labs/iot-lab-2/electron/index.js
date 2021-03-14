@@ -97,7 +97,7 @@ function update_data(){
         // 'connect' listener.
         console.log('connected to server!!!!');
         // send the message
-        client.write(`yolo`);
+        client.write(`data_update`);
     });
     
     // get the data from the server
