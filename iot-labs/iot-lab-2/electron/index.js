@@ -4,6 +4,8 @@ document.onkeyup = resetKey;
 var server_port = 65432;
 var server_addr = "192.168.0.156";   // the IP address of your Raspberry PI
 
+var pi_timer = setInterval(update_data, 1000);
+
 function client(){
     
     const net = require('net');
@@ -87,8 +89,26 @@ function resetKey(e) {
 
 // update data for every 50ms
 function update_data(){
-    setInterval(function(){
-        // get image from python server
-        client();
-    }, 50);
+    const net = require('net');
+
+    console.log('updating data!');
+
+    const client = net.createConnection({ port: server_port, host: server_addr }, () => {
+        // 'connect' listener.
+        console.log('connected to server!!!!');
+        // send the message
+        client.write(`yolo`);
+    });
+    
+    // get the data from the server
+    client.on('data', (data) => {
+        document.getElementById("bluetooth").innerHTML = data;
+        console.log(data.toString());
+        client.end();
+        client.destroy();
+    });
+
+    client.on('end', () => {
+        console.log('disconnected from server');
+    });
 }
