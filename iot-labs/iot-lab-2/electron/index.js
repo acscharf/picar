@@ -103,6 +103,7 @@ function update_data(){
     // get the data from the server
     client.on('data', (data) => {
         document.getElementById("bluetooth").innerHTML = data;
+        console.log('got some data!!!!');
         console.log(data.toString());
         client.end();
         client.destroy();

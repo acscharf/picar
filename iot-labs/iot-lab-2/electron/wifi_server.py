@@ -128,6 +128,11 @@ def start_car_server():
                     elif command == 'stop':
                         fc.stop()
                         print("Stopping")
+                    elif command == 'data_update':
+                        print("sending piread")
+                        text = pi_read()
+                        json_msg = json.dumps(text)
+                        client.send(json_msg)
                     else:
                         print("Unrecognized command")
                         print(data)
